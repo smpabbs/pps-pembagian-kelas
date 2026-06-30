@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPS 2026/2027 — SMP ABBS Surakarta</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0e17;color:#e2e8f0;min-height:100vh}
+.header{background:#0d7377;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.header h1{font-size:18px;font-weight:700;color:#fff}
+.header span{font-size:13px;color:#b8f0f0}
+.header-actions{display:flex;gap:8px}
+.btn{background:#1a1f2e;color:#e2e8f0;border:1px solid #2a3040;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .2s}
+.btn:hover{background:#2a3040;border-color:#0d7377}
+.btn-primary{background:#0d7377;border-color:#0d7377;color:#fff;font-weight:600}
+.btn-primary:hover{background:#0f8a8f}
+.btn-success{background:#166534;border-color:#166534;color:#fff;font-weight:600}
+.btn-success:hover{background:#15803d}
+.btn-danger{background:#7f1d1d;border-color:#7f1d1d;color:#fff}
+.btn-danger:hover{background:#991b1b}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;background:#111827;border-bottom:1px solid #1f2937;overflow-x:auto}
+.tab{padding:12px 24px;cursor:pointer;color:#9ca3af;font-size:14px;font-weight:500;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:#e2e8f0;background:#1a1f2e}
+.tab.active{color:#0d7377;border-bottom-color:#0d7377;background:#1a1f2e}
+.content{padding:20px 24px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.card{background:#1a1f2e;border-radius:10px;padding:20px;margin-bottom:16px;border:1px solid #2a3040}
+.card-title{font-size:16px;font-weight:600;margin-bottom:12px;color:#f1f5f9}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#1a1f2e;border:1px solid #2a3040;border-radius:10px;padding:16px;text-align:center}
+.stat-card .num{font-size:32px;font-weight:700;color:#0d7377}
+.stat-card .label{font-size:12px;color:#9ca3af;margin-top:4px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#111827;color:#9ca3af;font-weight:600;padding:10px 12px;text-align:left;border-bottom:2px solid #2a3040;position:sticky;top:0}
+td{padding:8px 12px;border-bottom:1px solid #1f2937;vertical-align:middle}
+tr:hover td{background:#242a3a}
+tr:nth-child(even) td{background:#181e2c}
+tr:nth-child(even):hover td{background:#242a3a}
+td[contenteditable]{cursor:text;border-radius:3px;transition:background .2s}
+td[contenteditable]:hover{background:#2a3348}
+td[contenteditable]:focus{background:#1f2a40;outline:1px solid #0d7377;outline-offset:-1px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-ict-l{background:#0d737722;color:#4dd8db;border:1px solid #0d7377}
+.badge-tcp-l{background:#2a5a2a22;color:#6fcf6f;border:1px solid #2a5a2a}
+.badge-vcp-l{background:#6b3a7b22;color:#c084d8;border:1px solid #6b3a7b}
+.badge-ict-p{background:#8b451322;color:#e8a85d;border:1px solid #8b4513}
+.badge-tcp-p{background:#1a6b8a22;color:#5dc8e8;border:1px solid #1a6b8a}
+.badge-vcp-p{background:#d4a35d22;color:#d4a35d;border:1px solid #d4a35d}
+.accordion{margin-bottom:8px}
+.accordion-header{background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s}
+.accordion-header:hover{border-color:#0d7377}
+.accordion-header .cls-name{font-weight:600;font-size:15px}
+.accordion-header .cls-info{font-size:12px;color:#9ca3af}
+.accordion-header .arrow{transition:transform .3s;font-size:12px}
+.accordion.open .accordion-header{border-radius:8px 8px 0 0}
+.accordion.open .accordion-header .arrow{transform:rotate(180deg)}
+.accordion-body{display:none;background:#111827;border:1px solid #2a3040;border-top:none;border-radius:0 0 8px 8px;padding:12px;overflow-x:auto}
+.accordion.open .accordion-body{display:block}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filter-bar select,.filter-bar input{background:#111827;border:1px solid #2a3040;color:#e2e8f0;padding:8px 12px;border-radius:6px;font-size:13px}
+.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:#0d7377}
+.filter-bar input{min-width:200px}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#1a1f2e;border:1px solid #2a3040;border-radius:12px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:18px;margin-bottom:16px;color:#f1f5f9}
+.modal label{display:block;font-size:13px;color:#9ca3af;margin-bottom:4px;margin-top:12px}
+.modal input,.modal select{width:100%;background:#111827;border:1px solid #2a3040;color:#e2e8f0;padding:10px 12px;border-radius:6px;font-size:14px}
+.modal input:focus,.modal select:focus{outline:none;border-color:#0d7377}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.toast{position:fixed;bottom:24px;right:24px;background:#0d7377;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;z-index:2000;opacity:0;transform:translateY(20px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:#7f1d1d}
+.toast.loading{background:#2563eb}
+.rule-section{margin-bottom:20px}
+.rule-section h3{color:#0d7377;font-size:15px;margin-bottom:8px}
+.rule-section ul{list-style:none;padding:0}
+.rule-section li{padding:6px 0;border-bottom:1px solid #1f2937;font-size:13px;color:#cbd5e1}
+.rule-section li:last-child{border-bottom:none}
+.rule-table{width:auto;min-width:300px;margin:8px 0}
+.rule-table td{padding:6px 12px;font-size:13px}
+.rule-table td:first-child{font-weight:600;color:#f1f5f9}
+.rule-table tr:nth-child(even) td{background:transparent}
+.rule-highlight{color:#0d7377;font-weight:600}
+.loading-screen{display:flex;justify-content:center;align-items:center;height:60vh;color:#9ca3af;font-size:16px;flex-direction:column;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid #2a3040;border-top-color:#0d7377;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-sm{width:16px;height:16px;border:2px solid #e2e8f033;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+@media print{body{background:#fff;color:#000}.header,.tabs,.btn,.filter-bar,.header-actions{display:none!important}.tab-panel{display:block!important}.card{background:#fff!important;border:1px solid #ddd!important}td[contenteditable]{cursor:default}td[contenteditable]:focus{outline:none}th{background:#eee!important;color:#000!important}td{color:#000!important;border-color:#ddd!important}}
+@media(max-width:768px){.header h1{font-size:15px}.content{padding:12px}.tab{padding:10px 14px;font-size:13px}.stats{grid-template-columns:repeat(2,1fr)}td,th{padding:6px 8px;font-size:12px}}
+@media(max-width:480px){.header{flex-direction:column;align-items:stretch}.header-actions{justify-content:stretch}.btn{flex:1;text-align:center}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📋 PPS 2026/2027 — SMP ABBS Surakarta</h1>
+    <span id="headerInfo">Memuat data...</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-success" id="btnSimpan" onclick="simpanKeGithub()">💾 Simpan Data</button>
+    <button class="btn" onclick="window.location.reload()">🔄 Refresh</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" data-tab="data" onclick="switchTab('data')">📋 Data PPS</div>
+  <div class="tab" data-tab="kelas" onclick="switchTab('kelas')">👥 Pembagian Kelas</div>
+  <div class="tab" data-tab="aturan" onclick="switchTab('aturan')">📖 Aturan</div>
+</div>
+
+<div class="content">
+  <div class="tab-panel active" id="panel-dashboard">
+    <div class="loading-screen"><div class="spinner"></div>Memuat data...</div>
+  </div>
+  <div class="tab-panel" id="panel-data"></div>
+  <div class="tab-panel" id="panel-kelas"></div>
+  <div class="tab-panel" id="panel-aturan"></div>
+</div>
+
+<!-- MODAL TAMBAH SISWA -->
+<div class="modal-overlay" id="modalTambah">
+  <div class="modal">
+    <h2>Tambah Siswa Baru</h2>
+    <label>Program</label>
+    <select id="mProgram">
+      <option value="ICT-L">ICT-L</option><option value="TCP-L">TCP-L</option><option value="VCP-L">VCP-L</option>
+      <option value="ICT-P">ICT-P</option><option value="TCP-P">TCP-P</option><option value="VCP-P">VCP-P</option>
+    </select>
+    <label>Tanggal Daftar (DD/MM/YYYY)</label>
+    <input type="text" id="mTgl" placeholder="25/06/2026" value="">
+    <label>Nama Lengkap</label>
+    <input type="text" id="mNama" placeholder="Nama siswa">
+    <label>Asal Sekolah</label>
+    <input type="text" id="mAsal" placeholder="SD/SMP ...">
+    <label>Catatan (opsional)</label>
+    <input type="text" id="mCatatan" placeholder="">
+    <div class="modal-actions">
+      <button class="btn" onclick="tutupModal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanSiswaBaru()">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let siswa = [];
+let sha = '';
+let currentTab = 'dashboard';
+let filterProgram = '';
+let filterSearch = '';
+let nextId = 1;
+let dataLoaded = false;
+
+// ═══════════════════════════════════════════
+// INIT — fetch dari API
+// ═══════════════════════════════════════════
+async function init() {
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) throw new Error('Gagal fetch data');
+    const data = await res.json();
+    sha = data._sha || '';
+    delete data._sha;
+    siswa = data.siswa || [];
+    nextId = Math.max(...siswa.map(s => s.id), 0) + 1;
+    dataLoaded = true;
+    renderAll();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('panel-dashboard').innerHTML = `
+      <div class="card" style="text-align:center;padding:40px">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <div style="color:#ef4444;font-weight:600;margin-bottom:8px">Gagal memuat data dari server</div>
+        <div style="color:#9ca3af;font-size:13px;margin-bottom:20px">${err.message}</div>
+        <button class="btn btn-primary" onclick="window.location.reload()">🔄 Coba Lagi</button>
+      </div>`;
+    document.getElementById('headerInfo').textContent = '⚠️ Gagal memuat data';
+  }
+}
+
+// ═══════════════════════════════════════════
+// SIMPAN KE GITHUB (auto-commit)
+// ═══════════════════════════════════════════
+async function simpanKeGithub() {
+  const btn = document.getElementById('btnSimpan');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-sm"></span> Menyimpan...';
+  
+  try {
+    const res = await fetch('/api/simpan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ siswa, sha })
+    });
+    
+    const result = await res.json();
+    
+    if (!res.ok || !result.success) {
+      throw new Error(result.error || result.detail || 'Gagal menyimpan');
+    }
+    
+    // Update SHA dari response
+    if (result.sha) sha = result.sha;
+    
+    toast('✅ ' + result.message);
+  } catch (err) {
+    toast('❌ ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Simpan Data';
+  }
+}
+
+// ═══════════════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════════════
+function parseDate(str) {
+  if (!str) return 99999999;
+  const parts = str.split('/');
+  if (parts.length === 3) {
+    return parseInt(parts[2])*10000 + parseInt(parts[1])*100 + parseInt(parts[0]);
+  }
+  return 99999999;
+}
+function dateSort(a,b) { return parseDate(a.tgl_daftar) - parseDate(b.tgl_daftar); }
+
+function getLatestDate() {
+  let latest = 0, str = '';
+  for (const s of siswa) {
+    const d = parseDate(s.tgl_daftar);
+    if (d > latest && d < 99999999) { latest = d; str = s.tgl_daftar; }
+  }
+  return str;
+}
+
+// ═══════════════════════════════════════════
+// CLASS DIVISION ENGINE
+// ═══════════════════════════════════════════
+function calculateClasses() {
+  const putra = siswa.filter(s => s.program.endsWith('-L')).sort(dateSort);
+  const putri = siswa.filter(s => s.program.endsWith('-P')).sort(dateSort);
+  const ict_l = putra.filter(s => s.program === 'ICT-L').sort(dateSort);
+  const tcp_l = putra.filter(s => s.program === 'TCP-L').sort(dateSort);
+  const vcp_l = putra.filter(s => s.program === 'VCP-L').sort(dateSort);
+  const ict_p = putri.filter(s => s.program === 'ICT-P').sort(dateSort);
+  const tcp_p = putri.filter(s => s.program === 'TCP-P').sort(dateSort);
+  const vcp_p = putri.filter(s => s.program === 'VCP-P').sort(dateSort);
+  return {
+    '7A': [...ict_l.slice(0,26), ...vcp_l.slice(0,3)].sort(dateSort),
+    '7B': [...ict_l.slice(26,52), ...vcp_l.slice(3,6)].sort(dateSort),
+    '7C': [...ict_l.slice(52), ...tcp_l, ...vcp_l.slice(6)].sort(dateSort),
+    '7D': [...ict_p].sort(dateSort),
+    '7E': [...tcp_p, ...vcp_p].sort(dateSort),
+  };
+}
+
+// ═══════════════════════════════════════════
+// BADGE HELPER
+// ═══════════════════════════════════════════
+function badge(prog) {
+  const cls = 'badge-' + prog.toLowerCase().replace('-','-');
+  return `<span class="badge ${cls}">${prog}</span>`;
+}
+function lpLabel(prog) { return prog.endsWith('-L') ? 'L' : 'P'; }
+
+// ═══════════════════════════════════════════
+// RENDER: HEADER
+// ═══════════════════════════════════════════
+function renderHeader() {
+  const l = siswa.filter(s => s.program.endsWith('-L')).length;
+  const p = siswa.filter(s => s.program.endsWith('-P')).length;
+  document.getElementById('headerInfo').textContent = 
+    `${siswa.length} siswa  ·  L: ${l}  ·  P: ${p}  ·  ${getLatestDate()}`;
+}
+
+// ═══════════════════════════════════════════
+// RENDER: DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  const l = siswa.filter(s => s.program.endsWith('-L')).length;
+  const p = siswa.filter(s => s.program.endsWith('-P')).length;
+  const kelas = calculateClasses();
+  const kelasList = ['7A','7B','7C','7D','7E'];
+  const progs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
+  
+  let html = `
+  <div class="stats">
+    <div class="stat-card"><div class="num">${siswa.length}</div><div class="label">Total Siswa</div></div>
+    <div class="stat-card"><div class="num">${l}</div><div class="label">Putra (L)</div></div>
+    <div class="stat-card"><div class="num">${p}</div><div class="label">Putri (P)</div></div>
+    <div class="stat-card"><div class="num">5</div><div class="label">Kelas (7A–7E)</div></div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">📊 Ringkasan Pembagian Kelas</div>
+    <div class="table-wrap"><table>
+      <tr><th>Kelas</th><th>Total</th><th>ICT-L</th><th>TCP-L</th><th>VCP-L</th><th>ICT-P</th><th>TCP-P</th><th>VCP-P</th><th>Komposisi</th></tr>`;
+  
+  for (const k of kelasList) {
+    const students = kelas[k];
+    const counts = {};
+    for (const s of students) counts[s.program] = (counts[s.program]||0)+1;
+    const comps = progs.filter(p => counts[p]).map(p => `${counts[p]} ${p}`).join(' + ');
+    html += `<tr><td><strong>${k}</strong></td><td><strong>${students.length}</strong></td>
+      ${progs.map(p => `<td>${counts[p]||''}</td>`).join('')}
+      <td style="font-size:12px;color:#9ca3af">${comps}</td></tr>`;
+  }
+  
+  // Total row
+  const grand = {};
+  for (const k of kelasList) for (const s of kelas[k]) grand[s.program] = (grand[s.program]||0)+1;
+  const gt = Object.values(grand).reduce((a,b)=>a+b,0);
+  html += `<tr style="background:#0d737722;font-weight:600">
+    <td>TOTAL</td><td>${gt}</td>
+    ${progs.map(p => `<td>${grand[p]||''}</td>`).join('')}<td></td></tr>`;
+  html += `</table></div></div>`;
+  
+  document.getElementById('panel-dashboard').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// RENDER: DATA PPS
+// ═══════════════════════════════════════════
+function renderData() {
+  let filtered = [...siswa];
+  if (filterProgram) filtered = filtered.filter(s => s.program === filterProgram);
+  if (filterSearch) {
+    const q = filterSearch.toLowerCase();
+    filtered = filtered.filter(s => s.nama.toLowerCase().includes(q) || s.asal_sekolah.toLowerCase().includes(q));
+  }
+  
+  const counts = {};
+  for (const s of siswa) counts[s.program] = (counts[s.program]||0)+1;
+  const programs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
+  
+  let html = `
+  <div class="card">
+    <div class="card-title">📋 Data PPS — ${siswa.length} Siswa</div>
+    <div class="filter-bar">
+      <select onchange="filterProgram=this.value;renderData()">
+        <option value="">Semua Program</option>
+        ${programs.map(p => `<option value="${p}" ${filterProgram===p?'selected':''}>${p} (${counts[p]||0})</option>`).join('')}
+      </select>
+      <input type="text" placeholder="Cari nama atau asal sekolah..." value="${filterSearch}" 
+        oninput="filterSearch=this.value;renderData()" id="searchInput">
+      <button class="btn btn-primary" onclick="bukaModalTambah()">+ Tambah Siswa</button>
+      <span style="font-size:12px;color:#9ca3af">${filtered.length} dari ${siswa.length} siswa</span>
+    </div>
+    <div class="table-wrap"><table>
+      <tr><th style="width:50px">No</th><th style="width:100px">Program</th><th style="width:130px">Tgl Daftar</th><th>Nama Siswa</th><th>Asal Sekolah</th><th>Catatan</th><th style="width:40px"></th></tr>`;
+  
+  filtered.forEach((s, i) => {
+    html += `<tr>
+      <td style="text-align:center">${i+1}</td>
+      <td><span contenteditable="true" onblur="updateField(${s.id},'program',this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${badge(s.program)}</span></td>
+      <td><span contenteditable="true" onblur="updateField(${s.id},'tgl_daftar',this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${s.tgl_daftar}</span></td>
+      <td><span contenteditable="true" onblur="updateField(${s.id},'nama',this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${s.nama}</span></td>
+      <td><span contenteditable="true" onblur="updateField(${s.id},'asal_sekolah',this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${s.asal_sekolah}</span></td>
+      <td><span contenteditable="true" onblur="updateField(${s.id},'catatan',this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${s.catatan||''}</span></td>
+      <td style="text-align:center"><span style="cursor:pointer;color:#ef4444;font-size:16px" onclick="hapusSiswa(${s.id})" title="Hapus">✕</span></td>
+    </tr>`;
+  });
+  
+  html += `</table></div></div>`;
+  document.getElementById('panel-data').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// RENDER: KELAS
+// ═══════════════════════════════════════════
+function renderKelas() {
+  const kelas = calculateClasses();
+  const kelasList = ['7A','7B','7C','7D','7E'];
+  const classNames = {'7A':'Putra 1','7B':'Putra 2','7C':'Putra 3','7D':'Putri 1','7E':'Putri 2'};
+  const colors = {'7A':'#0d7377','7B':'#1a6b8a','7C':'#2a5a2a','7D':'#8b4513','7E':'#6b3a7b'};
+  
+  let html = `<div class="stats" style="grid-template-columns:repeat(5,1fr)">`;
+  for (const k of kelasList) {
+    const students = kelas[k];
+    const progCounts = {};
+    for (const s of students) progCounts[s.program] = (progCounts[s.program]||0)+1;
+    const comps = Object.entries(progCounts).map(([p,c]) => `${c} ${p}`).join(' + ');
+    html += `<div class="stat-card" style="border-left:3px solid ${colors[k]}">
+      <div class="num" style="color:${colors[k]}">${students.length}</div>
+      <div class="label">${k} (${classNames[k]})</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px">${comps}</div></div>`;
+  }
+  html += `</div>`;
+  
+  for (const k of kelasList) {
+    const students = kelas[k];
+    html += `<div class="accordion" id="acc-${k}">
+      <div class="accordion-header" onclick="toggleAccordion('${k}')">
+        <div><span class="cls-name" style="color:${colors[k]}">${k} — ${classNames[k]}</span>
+          <span class="cls-info">${students.length} siswa</span></div>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="accordion-body"><div class="table-wrap"><table>
+        <tr><th>No</th><th>Program</th><th>Tgl Daftar</th><th>Nama Siswa</th><th>L/P</th><th>Asal Sekolah</th><th>Ket</th></tr>`;
+    students.forEach((s, i) => {
+      html += `<tr><td style="text-align:center">${i+1}</td>
+        <td>${badge(s.program)}</td><td>${s.tgl_daftar}</td>
+        <td><strong>${s.nama}</strong></td><td style="text-align:center">${lpLabel(s.program)}</td>
+        <td>${s.asal_sekolah}</td><td style="color:#9ca3af;font-size:12px">${s.catatan||''}</td></tr>`;
+    });
+    html += `</table></div></div></div>`;
+  }
+  document.getElementById('panel-kelas').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// RENDER: ATURAN
+// ═══════════════════════════════════════════
+function renderAturan() {
+  document.getElementById('panel-aturan').innerHTML = `
+  <div class="card">
+    <div class="card-title">📖 Aturan Pembagian Kelas PPS 2026/2027</div>
+    <div class="rule-section">
+      <h3>1. Pisahkan Putra dan Putri</h3>
+      <p style="font-size:13px;color:#9ca3af;margin-bottom:8px">Program berakhiran <strong>-L</strong> = Laki-laki, <strong>-P</strong> = Perempuan</p>
+      <table class="rule-table"><tr><td>Putra (L)</td><td>ICT-L + TCP-L + VCP-L</td><td>86 siswa</td></tr>
+      <tr><td>Putri (P)</td><td>ICT-P + TCP-P + VCP-P</td><td>49 siswa</td></tr></table>
+    </div>
+    <div class="rule-section">
+      <h3>2. Alokasi Putra → 3 Kelas</h3>
+      <p style="font-size:13px;color:#9ca3af;margin-bottom:8px">Diurutkan berdasarkan <strong>Tanggal Daftar</strong> (tertua → termuda)</p>
+      <table class="rule-table">
+        <tr><td>7A (Putra 1)</td><td>26 ICT-L (tertua) + 3 VCP-L (tertua)</td><td>= 29 siswa</td></tr>
+        <tr><td>7B (Putra 2)</td><td>26 ICT-L (berikutnya) + 3 VCP-L (berikutnya)</td><td>= 29 siswa</td></tr>
+        <tr><td>7C (Putra 3)</td><td>11 ICT-L (sisa) + 16 TCP-L (semua) + 1 VCP-L (sisa)</td><td>= 28 siswa</td></tr>
+      </table>
+    </div>
+    <div class="rule-section">
+      <h3>3. Alokasi Putri → 2 Kelas</h3>
+      <table class="rule-table">
+        <tr><td>7D (Putri 1)</td><td>29 ICT-P (semua)</td><td>= 29 siswa</td></tr>
+        <tr><td>7E (Putri 2)</td><td>19 TCP-P (semua) + 1 VCP-P (semua)</td><td>= 20 siswa</td></tr>
+      </table>
+    </div>
+    <div class="rule-section">
+      <h3>4. Cara Pakai</h3>
+      <ul>
+        <li>✏️ Klik langsung pada sel untuk mengubah data</li>
+        <li>🔄 Pembagian kelas otomatis menyesuaikan</li>
+        <li>➕ Tombol "+ Tambah Siswa" untuk menambah siswa baru</li>
+        <li>❌ Klik ✕ untuk menghapus siswa</li>
+        <li>💾 Klik <span class="rule-highlight">"Simpan Data"</span> untuk menyimpan permanen ke GitHub</li>
+        <li>🔄 Klik "Refresh" untuk memuat ulang data dari server</li>
+      </ul>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+tab));
+  if (!dataLoaded) return;
+  switch(tab) {
+    case 'dashboard': renderDashboard(); break;
+    case 'data': renderData(); break;
+    case 'kelas': renderKelas(); break;
+    case 'aturan': renderAturan(); break;
+  }
+}
+
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+function updateField(id, field, value) {
+  const s = siswa.find(x => x.id === id);
+  if (!s) return;
+  value = value.trim();
+  
+  if (field === 'program') {
+    const valid = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
+    if (!valid.includes(value)) {
+      toast('Program tidak valid! Pilih: ICT-L/TCP-L/VCP-L/ICT-P/TCP-P/VCP-P', true);
+      renderData(); return;
+    }
+  }
+  if (field === 'tgl_daftar') {
+    const parts = value.split('/');
+    if (parts.length !== 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+      toast('Format tanggal salah! Gunakan DD/MM/YYYY', true);
+      renderData(); return;
+    }
+  }
+  if (field === 'nama' && !value) {
+    toast('Nama tidak boleh kosong!', true);
+    renderData(); return;
+  }
+  
+  s[field] = value;
+  renderAll();
+}
+
+function bukaModalTambah() {
+  document.getElementById('modalTambah').classList.add('show');
+  document.getElementById('mNama').focus();
+}
+function tutupModal() { document.getElementById('modalTambah').classList.remove('show'); }
+
+function simpanSiswaBaru() {
+  const program = document.getElementById('mProgram').value;
+  const tgl = document.getElementById('mTgl').value.trim();
+  const nama = document.getElementById('mNama').value.trim();
+  const asal = document.getElementById('mAsal').value.trim();
+  const catatan = document.getElementById('mCatatan').value.trim();
+  
+  if (!nama) { toast('Nama harus diisi!', true); return; }
+  if (!tgl) { toast('Tanggal harus diisi!', true); return; }
+  const p = tgl.split('/');
+  if (p.length !== 3 || isNaN(p[0]) || isNaN(p[1]) || isNaN(p[2])) {
+    toast('Format tanggal salah! Gunakan DD/MM/YYYY', true); return;
+  }
+  
+  siswa.push({ id: nextId++, program, tgl_daftar: tgl, nama, asal_sekolah: asal, catatan });
+  tutupModal();
+  document.getElementById('mTgl').value = '';
+  document.getElementById('mNama').value = '';
+  document.getElementById('mAsal').value = '';
+  document.getElementById('mCatatan').value = '';
+  toast('✅ Siswa ditambahkan. Klik "Simpan Data" untuk menyimpan');
+  renderAll();
+}
+
+function hapusSiswa(id) {
+  if (!confirm('Hapus siswa ini?')) return;
+  siswa = siswa.filter(s => s.id !== id);
+  toast('✅ Siswa dihapus. Klik "Simpan Data" untuk menyimpan');
+  renderAll();
+}
+
+function toggleAccordion(k) { document.getElementById('acc-'+k).classList.toggle('open'); }
+
+// ═══════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════
+function renderAll() {
+  renderHeader();
+  switchTab(currentTab);
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function toast(msg, isError) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (isError ? ' error' : '');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD SHORTCUT
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    simpanKeGithub();
+  }
+});
+
+// ═══════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
