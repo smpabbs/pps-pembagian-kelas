@@ -1,10 +1,10 @@
 {
   "title": "PENERIMAAN PESERTA DIDIK BARU (PPS) 2026/2027",
   "sekolah": "SMP ABBS Surakarta",
-  "total": 136,
-  "l_count": 87,
+  "total": 135,
+  "l_count": 86,
   "p_count": 49,
-  "per_tanggal": "30/06/2026",
+  "per_tanggal": "25/06/2026",
   "siswa": [
     {
       "id": 1,
@@ -1085,14 +1085,6 @@
       "nama": "Zahira Arthanarisa Maheswari",
       "asal_sekolah": "SDIT Nurul Islam Dua Tempurejo Ngawi",
       "catatan": ""
-    },
-    {
-      "id": 136,
-      "program": "ICT-L",
-      "tgl_daftar": "30/06/2026",
-      "nama": "TEST-SISWA-136",
-      "asal_sekolah": "TEST-OTOMASI",
-      "catatan": "HAPUS SETELAH UJI"
     }
   ]
 }
