@@ -1,10 +1,10 @@
 {
   "title": "PENERIMAAN PESERTA DIDIK BARU (PPS) 2026/2027",
   "sekolah": "SMP ABBS Surakarta",
-  "total": 135,
-  "l_count": 86,
-  "p_count": 49,
-  "per_tanggal": "25/06/2026",
+  "total": 138,
+  "l_count": 87,
+  "p_count": 51,
+  "per_tanggal": "4/7/2026",
   "siswa": [
     {
       "id": 1,
@@ -1084,6 +1084,30 @@
       "tgl_daftar": "25/06/2026",
       "nama": "Zahira Arthanarisa Maheswari",
       "asal_sekolah": "SDIT Nurul Islam Dua Tempurejo Ngawi",
+      "catatan": ""
+    },
+    {
+      "id": 136,
+      "program": "TCP-L",
+      "tgl_daftar": "2/7/2026",
+      "nama": "Muhammad Amzar Mahardika",
+      "asal_sekolah": "SDIT Lukman Al Hakim",
+      "catatan": "Beassiswa Taekwondo Nasional"
+    },
+    {
+      "id": 137,
+      "program": "VCP-P",
+      "tgl_daftar": "4/7/2026",
+      "nama": "Areta Bernadine Ovania",
+      "asal_sekolah": "SDN 1 Pabelan",
+      "catatan": ""
+    },
+    {
+      "id": 138,
+      "program": "VCP-P",
+      "tgl_daftar": "13/6/2026",
+      "nama": "Aaron blenda pratama",
+      "asal_sekolah": "SDK Lampung Tengah",
       "catatan": ""
     }
   ]
