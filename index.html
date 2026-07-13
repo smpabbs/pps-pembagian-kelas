@@ -94,6 +94,7 @@ td[contenteditable]:focus{background:#1f2a40;outline:1px solid #0d7377;outline-o
 @media(max-width:768px){.header h1{font-size:15px}.content{padding:12px}.tab{padding:10px 14px;font-size:13px}.stats{grid-template-columns:repeat(2,1fr)}td,th{padding:6px 8px;font-size:12px}}
 @media(max-width:480px){.header{flex-direction:column;align-items:stretch}.header-actions{justify-content:stretch}.btn{flex:1;text-align:center}}
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -104,6 +105,7 @@ td[contenteditable]:focus{background:#1f2a40;outline:1px solid #0d7377;outline-o
   </div>
   <div class="header-actions">
     <button class="btn btn-success" id="btnSimpan" onclick="simpanKeGithub()">💾 Simpan Data</button>
+    <button class="btn btn-primary" onclick="exportToExcel()">📥 Export Excel</button>
     <button class="btn" onclick="window.location.reload()">🔄 Refresh</button>
   </div>
 </div>
@@ -582,6 +584,92 @@ document.addEventListener('keydown', function(e) {
 // START
 // ═══════════════════════════════════════════
 init();
+
+// ═══════════════════════════════════════════
+// EXPORT TO EXCEL (via SheetJS)
+// ═══════════════════════════════════════════
+function exportToExcel() {
+  const kelas = calculateClasses();
+  const kelasList = ['7A','7B','7C','7D','7E'];
+  
+  toast('📥 Menyiapkan file Excel...', false);
+  
+  try {
+    // ─── Sheet 1: Data Lengkap ───
+    const dataLengkap = [['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan', 'Kelas']];
+    let no = 0;
+    for (const k of kelasList) {
+      for (const s of kelas[k]) {
+        no++;
+        dataLengkap.push([no, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '', k]);
+      }
+    }
+    
+    // ─── Sheet 2: Per Kelas ───
+    const perKelas = [];
+    for (const k of kelasList) {
+      perKelas.push([`KELAS ${k} — ${kelas[k].length} siswa`]);
+      perKelas.push(['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan']);
+      kelas[k].forEach((s, i) => {
+        perKelas.push([i+1, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '']);
+      });
+      perKelas.push([]);
+    }
+    
+    // ─── Sheet 3: Ringkasan ───
+    const progs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
+    const progCounts = {};
+    for (const s of siswa) progCounts[s.program] = (progCounts[s.program]||0) + 1;
+    
+    const ringkasan = [['PROGRAM', 'L/P', 'JUMLAH']];
+    for (const p of progs) {
+      ringkasan.push([p, p.endsWith('-L') ? 'L' : 'P', progCounts[p] || 0]);
+    }
+    ringkasan.push([]);
+    ringkasan.push(['KELAS', 'JUMLAH', 'L', 'P']);
+    for (const k of kelasList) {
+      const l = kelas[k].filter(s => s.program.endsWith('-L')).length;
+      const p = kelas[k].filter(s => s.program.endsWith('-P')).length;
+      ringkasan.push([k, kelas[k].length, l, p]);
+    }
+    const total = siswa.length;
+    ringkasan.push(['TOTAL', total, siswa.filter(s => s.program.endsWith('-L')).length, siswa.filter(s => s.program.endsWith('-P')).length]);
+    
+    // ─── Build workbook ───
+    const wb = XLSX.utils.book_new();
+    const ws1 = XLSX.utils.aoa_to_sheet(dataLengkap);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Data Lengkap');
+    
+    const ws2 = XLSX.utils.aoa_to_sheet(perKelas);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Per Kelas');
+    
+    const ws3 = XLSX.utils.aoa_to_sheet(ringkasan);
+    XLSX.utils.book_append_sheet(wb, ws3, 'Ringkasan');
+    
+    // ─── Column widths ───
+    ws1['!cols'] = [{wch:5},{wch:42},{wch:10},{wch:14},{wch:35},{wch:25},{wch:8}];
+    ws2['!cols'] = [{wch:5},{wch:42},{wch:10},{wch:14},{wch:35},{wch:25}];
+    ws3['!cols'] = [{wch:12},{wch:8},{wch:10}];
+    
+    // ─── Generate & download ───
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Pembagian_Kelas_PPS_2026.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast('✅ File Excel berhasil di-download!');
+  } catch (err) {
+    toast('❌ Gagal export: ' + err.message, true);
+    console.error(err);
+  }
+}
+
 </script>
 </body>
 </html>
