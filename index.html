@@ -94,7 +94,7 @@ td[contenteditable]:focus{background:#1f2a40;outline:1px solid #0d7377;outline-o
 @media(max-width:768px){.header h1{font-size:15px}.content{padding:12px}.tab{padding:10px 14px;font-size:13px}.stats{grid-template-columns:repeat(2,1fr)}td,th{padding:6px 8px;font-size:12px}}
 @media(max-width:480px){.header{flex-direction:column;align-items:stretch}.header-actions{justify-content:stretch}.btn{flex:1;text-align:center}}
 </style>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -586,84 +586,241 @@ document.addEventListener('keydown', function(e) {
 init();
 
 // ═══════════════════════════════════════════
-// EXPORT TO EXCEL (via SheetJS)
+// EXPORT TO EXCEL (via exceljs — format sama dengan Telegram)
 // ═══════════════════════════════════════════
 function exportToExcel() {
   const kelas = calculateClasses();
   const kelasList = ['7A','7B','7C','7D','7E'];
+  const classNames = {'7A':'Putra 1','7B':'Putra 2','7C':'Putra 3','7D':'Putri 1','7E':'Putri 2'};
+  const classColors = {'7A':'0D7377','7B':'1A6B8A','7C':'166534','7D':'8B4513','7E':'6B3A7B'};
+  const programs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
   
   toast('📥 Menyiapkan file Excel...', false);
   
   try {
-    // ─── Sheet 1: Data Lengkap ───
-    const dataLengkap = [['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan', 'Kelas']];
-    let no = 0;
-    for (const k of kelasList) {
-      for (const s of kelas[k]) {
-        no++;
-        dataLengkap.push([no, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '', k]);
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'PPS SMP ABBS Surakarta';
+    wb.created = new Date();
+    
+    // ─── Style helpers ───
+    const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } };
+    const HEADER_FONT = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF9CA3AF' } };
+    const TITLE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D7377' } };
+    const TITLE_FONT = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+    const SUBTITLE_FONT = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+    const THIN_BORDER = {
+      top: { style: 'thin', color: { argb: 'FF2A3040' } },
+      left: { style: 'thin', color: { argb: 'FF2A3040' } },
+      bottom: { style: 'thin', color: { argb: 'FF2A3040' } },
+      right: { style: 'thin', color: { argb: 'FF2A3040' } }
+    };
+    const EVEN_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF181E2C' } };
+    const ODD_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A1F2E' } };
+    
+    function applyHeaderRow(row, cols) {
+      row.height = 22;
+      for (let c = 1; c <= cols; c++) {
+        const cell = row.getCell(c);
+        cell.fill = HEADER_FILL;
+        cell.font = HEADER_FONT;
+        cell.border = THIN_BORDER;
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
       }
     }
     
-    // ─── Sheet 2: Per Kelas ───
-    const perKelas = [];
+    function applyDataRow(row, cols, isEven) {
+      for (let c = 1; c <= cols; c++) {
+        const cell = row.getCell(c);
+        cell.fill = isEven ? EVEN_FILL : ODD_FILL;
+        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FFE2E8F0' } };
+        cell.border = THIN_BORDER;
+        cell.alignment = { vertical: 'middle' };
+      }
+    }
+    
+    function styleClassHeader(row, colorHex, label) {
+      row.height = 24;
+      for (let c = 1; c <= 7; c++) {
+        const cell = row.getCell(c);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + colorHex } };
+        cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.border = THIN_BORDER;
+        cell.alignment = { vertical: 'middle' };
+      }
+    }
+    
+    // ═══════════════════════════════════════
+    // SHEET 1: DATA LENGKAP
+    // ═══════════════════════════════════════
+    const ws1 = wb.addWorksheet('Data Lengkap', {
+      views: [{ state: 'frozen', ySplit: 2 }]
+    });
+    
+    // Title row
+    const titleRow = ws1.addRow(['PENERIMAAN PESERTA DIDIK BARU — PEMBAGIAN KELAS 2026/2027']);
+    ws1.mergeCells('A1:G1');
+    titleRow.height = 30;
+    const tCell = titleRow.getCell(1);
+    tCell.fill = TITLE_FILL;
+    tCell.font = TITLE_FONT;
+    tCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    for (let c = 2; c <= 7; c++) {
+      titleRow.getCell(c).fill = TITLE_FILL;
+      titleRow.getCell(c).border = THIN_BORDER;
+    }
+    titleRow.getCell(1).border = THIN_BORDER;
+    
+    // Header row
+    const hRow1 = ws1.addRow(['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan', 'Kelas']);
+    applyHeaderRow(hRow1, 7);
+    
+    // Data grouped by class
+    let no = 0;
     for (const k of kelasList) {
-      perKelas.push([`KELAS ${k} — ${kelas[k].length} siswa`]);
-      perKelas.push(['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan']);
-      kelas[k].forEach((s, i) => {
-        perKelas.push([i+1, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '']);
+      // Class header row
+      const clsRow = ws1.addRow([`${k} — ${classNames[k]} (${kelas[k].length} siswa)`]);
+      ws1.mergeCells(`A${clsRow.number}:G${clsRow.number}`);
+      styleClassHeader(clsRow, classColors[k], `${k} — ${classNames[k]}`);
+      clsRow.getCell(1).value = `${k} — ${classNames[k]} (${kelas[k].length} siswa)`;
+      
+      // Student rows
+      kelas[k].forEach((s, idx) => {
+        no++;
+        const row = ws1.addRow([no, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '', k]);
+        applyDataRow(row, 7, idx % 2 === 0);
+        row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
+        row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
+        row.getCell(7).alignment = { vertical: 'middle', horizontal: 'center' };
       });
-      perKelas.push([]);
     }
     
-    // ─── Sheet 3: Ringkasan ───
-    const progs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
-    const progCounts = {};
-    for (const s of siswa) progCounts[s.program] = (progCounts[s.program]||0) + 1;
+    // Column widths
+    ws1.getColumn(1).width = 5;
+    ws1.getColumn(2).width = 38;
+    ws1.getColumn(3).width = 10;
+    ws1.getColumn(4).width = 14;
+    ws1.getColumn(5).width = 32;
+    ws1.getColumn(6).width = 22;
+    ws1.getColumn(7).width = 8;
     
-    const ringkasan = [['PROGRAM', 'L/P', 'JUMLAH']];
-    for (const p of progs) {
-      ringkasan.push([p, p.endsWith('-L') ? 'L' : 'P', progCounts[p] || 0]);
+    // ═══════════════════════════════════════
+    // SHEET 2: PER KELAS
+    // ═══════════════════════════════════════
+    const ws2 = wb.addWorksheet('Per Kelas');
+    
+    for (const k of kelasList) {
+      // Class title
+      const ctRow = ws2.addRow([`KELAS ${k} — ${classNames[k]} — ${kelas[k].length} siswa`]);
+      ws2.mergeCells(`A${ctRow.number}:F${ctRow.number}`);
+      ctRow.height = 26;
+      ctRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + classColors[k] } };
+      ctRow.getCell(1).font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+      ctRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
+      for (let c = 2; c <= 6; c++) {
+        ctRow.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + classColors[k] } };
+        ctRow.getCell(c).border = THIN_BORDER;
+      }
+      ctRow.getCell(1).border = THIN_BORDER;
+      
+      // Header
+      const hRow = ws2.addRow(['No', 'Nama Lengkap', 'Program', 'Tgl Daftar', 'Asal Sekolah', 'Catatan']);
+      applyHeaderRow(hRow, 6);
+      
+      // Student rows
+      kelas[k].forEach((s, idx) => {
+        const row = ws2.addRow([idx+1, s.nama, s.program, s.tgl_daftar, s.asal_sekolah, s.catatan || '']);
+        applyDataRow(row, 6, idx % 2 === 0);
+        row.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
+        row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
+      });
+      
+      // Spacer row
+      ws2.addRow([]);
     }
-    ringkasan.push([]);
-    ringkasan.push(['KELAS', 'JUMLAH', 'L', 'P']);
+    
+    ws2.getColumn(1).width = 5;
+    ws2.getColumn(2).width = 38;
+    ws2.getColumn(3).width = 10;
+    ws2.getColumn(4).width = 14;
+    ws2.getColumn(5).width = 32;
+    ws2.getColumn(6).width = 22;
+    
+    // ═══════════════════════════════════════
+    // SHEET 3: RINGKASAN
+    // ═══════════════════════════════════════
+    const ws3 = wb.addWorksheet('Ringkasan');
+    
+    // Title
+    const tRow3 = ws3.addRow(['RINGKASAN PEMBAGIAN KELAS PPS 2026/2027']);
+    ws3.mergeCells('A1:C1');
+    tRow3.height = 28;
+    tRow3.getCell(1).fill = TITLE_FILL;
+    tRow3.getCell(1).font = TITLE_FONT;
+    tRow3.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    for (let c = 2; c <= 3; c++) {
+      tRow3.getCell(c).fill = TITLE_FILL;
+      tRow3.getCell(c).border = THIN_BORDER;
+    }
+    tRow3.getCell(1).border = THIN_BORDER;
+    
+    // Subtitle
+    const subRow = ws3.addRow([`Total: ${siswa.length} siswa (L: ${siswa.filter(s=>s.program.endsWith('-L')).length}, P: ${siswa.filter(s=>s.program.endsWith('-P')).length})`]);
+    ws3.mergeCells(`A${subRow.number}:C${subRow.number}`);
+    subRow.getCell(1).font = SUBTITLE_FONT;
+    
+    // Program counts
+    const progHeader = ws3.addRow(['Program', 'L/P', 'Jumlah']);
+    applyHeaderRow(progHeader, 3);
+    
+    for (const p of programs) {
+      const cnt = siswa.filter(s => s.program === p).length;
+      const idx = programs.indexOf(p);
+      const row = ws3.addRow([p, p.endsWith('-L') ? 'L' : 'P', cnt]);
+      applyDataRow(row, 3, idx % 2 === 0);
+      row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+      row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
+    }
+    
+    ws3.addRow([]);
+    
+    // Per class
+    const clsHdr = ws3.addRow(['Kelas', 'Jumlah', 'L/P']);
+    applyHeaderRow(clsHdr, 3);
+    
     for (const k of kelasList) {
       const l = kelas[k].filter(s => s.program.endsWith('-L')).length;
       const p = kelas[k].filter(s => s.program.endsWith('-P')).length;
-      ringkasan.push([k, kelas[k].length, l, p]);
+      const idx = kelasList.indexOf(k);
+      const row = ws3.addRow([k, kelas[k].length, `${l} L / ${p} P`]);
+      applyDataRow(row, 3, idx % 2 === 0);
+      row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
     }
-    const total = siswa.length;
-    ringkasan.push(['TOTAL', total, siswa.filter(s => s.program.endsWith('-L')).length, siswa.filter(s => s.program.endsWith('-P')).length]);
     
-    // ─── Build workbook ───
-    const wb = XLSX.utils.book_new();
-    const ws1 = XLSX.utils.aoa_to_sheet(dataLengkap);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Data Lengkap');
+    ws3.getColumn(1).width = 14;
+    ws3.getColumn(2).width = 10;
+    ws3.getColumn(3).width = 14;
     
-    const ws2 = XLSX.utils.aoa_to_sheet(perKelas);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Per Kelas');
+    // ═══════════════════════════════════════
+    // GENERATE & DOWNLOAD
+    // ═══════════════════════════════════════
+    wb.xlsx.writeBuffer().then(function(buffer) {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pembagian_Kelas_PPS_2026.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('✅ File Excel berhasil di-download! Format sama dengan file Telegram.');
+    }).catch(function(err) {
+      toast('❌ Gagal generate Excel: ' + err.message, true);
+      console.error(err);
+    });
     
-    const ws3 = XLSX.utils.aoa_to_sheet(ringkasan);
-    XLSX.utils.book_append_sheet(wb, ws3, 'Ringkasan');
-    
-    // ─── Column widths ───
-    ws1['!cols'] = [{wch:5},{wch:42},{wch:10},{wch:14},{wch:35},{wch:25},{wch:8}];
-    ws2['!cols'] = [{wch:5},{wch:42},{wch:10},{wch:14},{wch:35},{wch:25}];
-    ws3['!cols'] = [{wch:12},{wch:8},{wch:10}];
-    
-    // ─── Generate & download ───
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Pembagian_Kelas_PPS_2026.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast('✅ File Excel berhasil di-download!');
   } catch (err) {
     toast('❌ Gagal export: ' + err.message, true);
     console.error(err);
