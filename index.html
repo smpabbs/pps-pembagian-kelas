@@ -94,7 +94,6 @@ td[contenteditable]:focus{background:#1f2a40;outline:1px solid #0d7377;outline-o
 @media(max-width:768px){.header h1{font-size:15px}.content{padding:12px}.tab{padding:10px 14px;font-size:13px}.stats{grid-template-columns:repeat(2,1fr)}td,th{padding:6px 8px;font-size:12px}}
 @media(max-width:480px){.header{flex-direction:column;align-items:stretch}.header-actions{justify-content:stretch}.btn{flex:1;text-align:center}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -580,15 +579,39 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+
+// ═══════════════════════════════════════════
+// DYNAMIC LIBRARY LOADER
+// ═══════════════════════════════════════════
+function loadExcelJS() {
+  return new Promise((resolve, reject) => {
+    if (typeof ExcelJS !== 'undefined') { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+    s.onload = () => { setTimeout(resolve, 100); }; // brief pause for init
+    s.onerror = reject;
+    document.head.appendChild(s);
+    setTimeout(() => reject(new Error('Timeout')), 15000);
+  });
+}
+
 // ═══════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════
 init();
 
 // ═══════════════════════════════════════════
-// EXPORT TO EXCEL (via exceljs — format sama dengan Telegram)
+// EXPORT TO EXCEL (dynamic load — format sama dengan Telegram)
 // ═══════════════════════════════════════════
-function exportToExcel() {
+async function exportToExcel() {
+  // Dynamic load exceljs only when needed
+  toast('📥 Memuat library Excel...', false);
+  try {
+    await loadExcelJS();
+  } catch (e) {
+    toast('❌ Gagal memuat library Excel. Cek koneksi internet.', true);
+    return;
+  }
   const kelas = calculateClasses();
   const kelasList = ['7A','7B','7C','7D','7E'];
   const classNames = {'7A':'Putra 1','7B':'Putra 2','7C':'Putra 3','7D':'Putri 1','7E':'Putri 2'};
