@@ -615,7 +615,7 @@ async function exportToExcel() {
   const kelas = calculateClasses();
   const kelasList = ['7A','7B','7C','7D','7E'];
   const classNames = {'7A':'Putra 1','7B':'Putra 2','7C':'Putra 3','7D':'Putri 1','7E':'Putri 2'};
-  const classColors = {'7A':'0D7377','7B':'1A6B8A','7C':'166534','7D':'8B4513','7E':'6B3A7B'};
+  const classColors = {'7A':'C0392B','7B':'D35400','7C':'E67E22','7D':'A0522D','7E':'8B4513'};
   const programs = ['ICT-L','TCP-L','VCP-L','ICT-P','TCP-P','VCP-P'];
   
   toast('📥 Menyiapkan file Excel...', false);
@@ -626,19 +626,19 @@ async function exportToExcel() {
     wb.created = new Date();
     
     // ─── Style helpers ───
-    const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } };
-    const HEADER_FONT = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF9CA3AF' } };
-    const TITLE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D7377' } };
+    const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B2500' } };
+    const HEADER_FONT = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFDF2E9' } };
+    const TITLE_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC0392B' } };
     const TITLE_FONT = { name: 'Calibri', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-    const SUBTITLE_FONT = { name: 'Calibri', size: 10, color: { argb: 'FF9CA3AF' } };
+    const SUBTITLE_FONT = { name: 'Calibri', size: 10, color: { argb: 'FF8B6F47' } };
     const THIN_BORDER = {
-      top: { style: 'thin', color: { argb: 'FF2A3040' } },
-      left: { style: 'thin', color: { argb: 'FF2A3040' } },
-      bottom: { style: 'thin', color: { argb: 'FF2A3040' } },
-      right: { style: 'thin', color: { argb: 'FF2A3040' } }
+      top: { style: 'thin', color: { argb: 'FFD4A574' } },
+      left: { style: 'thin', color: { argb: 'FFD4A574' } },
+      bottom: { style: 'thin', color: { argb: 'FFD4A574' } },
+      right: { style: 'thin', color: { argb: 'FFD4A574' } }
     };
-    const EVEN_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF181E2C' } };
-    const ODD_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A1F2E' } };
+    const EVEN_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF5ED' } };
+    const ODD_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEDDE' } };
     
     function applyHeaderRow(row, cols) {
       row.height = 22;
@@ -655,7 +655,7 @@ async function exportToExcel() {
       for (let c = 1; c <= cols; c++) {
         const cell = row.getCell(c);
         cell.fill = isEven ? EVEN_FILL : ODD_FILL;
-        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FFE2E8F0' } };
+        cell.font = { name: 'Calibri', size: 10, color: { argb: 'FF3E1A04' } };
         cell.border = THIN_BORDER;
         cell.alignment = { vertical: 'middle' };
       }
@@ -771,59 +771,117 @@ async function exportToExcel() {
     ws2.getColumn(6).width = 22;
     
     // ═══════════════════════════════════════
-    // SHEET 3: RINGKASAN
+    // SHEET 3: RINGKASAN (lengkap — total, program, kelas)
     // ═══════════════════════════════════════
     const ws3 = wb.addWorksheet('Ringkasan');
+    const R3 = 4; // columns for ringkasan
     
-    // Title
-    const tRow3 = ws3.addRow(['RINGKASAN PEMBAGIAN KELAS PPS 2026/2027']);
-    ws3.mergeCells('A1:C1');
-    tRow3.height = 28;
-    tRow3.getCell(1).fill = TITLE_FILL;
-    tRow3.getCell(1).font = TITLE_FONT;
-    tRow3.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
-    for (let c = 2; c <= 3; c++) {
-      tRow3.getCell(c).fill = TITLE_FILL;
-      tRow3.getCell(c).border = THIN_BORDER;
+    function rTitle(text) {
+      const r = ws3.addRow([text]);
+      ws3.mergeCells(`A${r.number}:D${r.number}`);
+      r.height = 28;
+      r.getCell(1).fill = TITLE_FILL;
+      r.getCell(1).font = TITLE_FONT;
+      r.getCell(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      for (let c = 2; c <= R3; c++) {
+        r.getCell(c).fill = TITLE_FILL;
+        r.getCell(c).border = THIN_BORDER;
+      }
+      r.getCell(1).border = THIN_BORDER;
+      return r;
     }
-    tRow3.getCell(1).border = THIN_BORDER;
-    
-    // Subtitle
-    const subRow = ws3.addRow([`Total: ${siswa.length} siswa (L: ${siswa.filter(s=>s.program.endsWith('-L')).length}, P: ${siswa.filter(s=>s.program.endsWith('-P')).length})`]);
-    ws3.mergeCells(`A${subRow.number}:C${subRow.number}`);
-    subRow.getCell(1).font = SUBTITLE_FONT;
-    
-    // Program counts
-    const progHeader = ws3.addRow(['Program', 'L/P', 'Jumlah']);
-    applyHeaderRow(progHeader, 3);
-    
-    for (const p of programs) {
-      const cnt = siswa.filter(s => s.program === p).length;
-      const idx = programs.indexOf(p);
-      const row = ws3.addRow([p, p.endsWith('-L') ? 'L' : 'P', cnt]);
-      applyDataRow(row, 3, idx % 2 === 0);
-      row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
-      row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
+    function rHeader(cols) {
+      const r = ws3.addRow(cols);
+      applyHeaderRow(r, cols.length);
+      return r;
+    }
+    function rData(cols, isEven) {
+      const r = ws3.addRow(cols);
+      applyDataRow(r, cols.length, isEven);
+      for (let c = 1; c <= cols.length; c++) {
+        r.getCell(c).alignment = { vertical: 'middle', horizontal: c === 1 ? 'left' : 'center' };
+      }
+      return r;
+    }
+    function rSection(text) {
+      const r = ws3.addRow([text]);
+      ws3.mergeCells(`A${r.number}:D${r.number}`);
+      r.height = 22;
+      r.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD35400' } };
+      r.getCell(1).font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      r.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
+      for (let c = 2; c <= R3; c++) {
+        r.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD35400' } };
+        r.getCell(c).border = THIN_BORDER;
+      }
+      r.getCell(1).border = THIN_BORDER;
+      return r;
     }
     
+    // ── Title ──
+    rTitle('RINGKASAN PEMBAGIAN KELAS PPS 2026/2027');
     ws3.addRow([]);
     
-    // Per class
-    const clsHdr = ws3.addRow(['Kelas', 'Jumlah', 'L/P']);
-    applyHeaderRow(clsHdr, 3);
+    // ── SECTION A: TOTAL ──
+    rSection('📊 TOTAL PENERIMAAN');
+    const totalL = siswa.filter(s=>s.program.endsWith('-L')).length;
+    const totalP = siswa.filter(s=>s.program.endsWith('-P')).length;
+    rData(['Total Siswa', '', '', siswa.length], true);
+    rData(['↳ Putra', 'L', '', totalL], false);
+    rData(['↳ Putri', 'P', '', totalP], true);
+    ws3.addRow([]);
+    
+    // ── SECTION B: PER PROGRAM DETAIL ──
+    rSection('📋 PER PROGRAM');
+    rHeader(['Program', 'Putra', 'Putri', 'Total']);
+    
+    const ictL = siswa.filter(s=>s.program==='ICT-L').length;
+    const ictP = siswa.filter(s=>s.program==='ICT-P').length;
+    const tcpL = siswa.filter(s=>s.program==='TCP-L').length;
+    const tcpP = siswa.filter(s=>s.program==='TCP-P').length;
+    const vcpL = siswa.filter(s=>s.program==='VCP-L').length;
+    const vcpP = siswa.filter(s=>s.program==='VCP-P').length;
+    
+    rData(['ICT (Information & Communication Tech.)', ictL, ictP, ictL+ictP], true);
+    rData(['  ↳ ICT-L', ictL, '-', ictL], false);
+    rData(['  ↳ ICT-P', '-', ictP, ictP], true);
+    rData(['Tahfidz (TCP)', tcpL, tcpP, tcpL+tcpP], false);
+    rData(['  ↳ TCP-L', tcpL, '-', tcpL], true);
+    rData(['  ↳ TCP-P', '-', tcpP, tcpP], false);
+    rData(['VCP (Vocational Creative Program)', vcpL, vcpP, vcpL+vcpP], true);
+    rData(['  ↳ VCP-L', vcpL, '-', vcpL], false);
+    rData(['  ↳ VCP-P', '-', vcpP, vcpP], true);
+    ws3.addRow([]);
+    rData(['TOTAL', totalL, totalP, siswa.length], false);
+    ws3.addRow([]);
+    
+    // ── SECTION C: PER KELAS ──
+    rSection('🏫 PER KELAS');
+    rHeader(['Kelas', 'L', 'P', 'Total']);
     
     for (const k of kelasList) {
-      const l = kelas[k].filter(s => s.program.endsWith('-L')).length;
-      const p = kelas[k].filter(s => s.program.endsWith('-P')).length;
+      const l = kelas[k].filter(s=>s.program.endsWith('-L')).length;
+      const p = kelas[k].filter(s=>s.program.endsWith('-P')).length;
       const idx = kelasList.indexOf(k);
-      const row = ws3.addRow([k, kelas[k].length, `${l} L / ${p} P`]);
-      applyDataRow(row, 3, idx % 2 === 0);
-      row.getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+      const row = ws3.addRow([`${k} — ${classNames[k]}`, l, p, kelas[k].length]);
+      applyDataRow(row, R3, idx % 2 === 0);
+      for (let c = 1; c <= R3; c++) {
+        const cell = row.getCell(c);
+        cell.border = THIN_BORDER;
+        cell.alignment = { vertical: 'middle', horizontal: c === 1 ? 'left' : 'center' };
+        // Class-colored first column
+        if (c === 1) {
+          cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF' + classColors[k] } };
+        }
+      }
     }
+    ws3.addRow([]);
+    rData(['TOTAL', totalL, totalP, siswa.length], false);
     
-    ws3.getColumn(1).width = 14;
-    ws3.getColumn(2).width = 10;
-    ws3.getColumn(3).width = 14;
+    ws3.getColumn(1).width = 42;
+    ws3.getColumn(2).width = 8;
+    ws3.getColumn(3).width = 8;
+    ws3.getColumn(4).width = 10;
     
     // ═══════════════════════════════════════
     // GENERATE & DOWNLOAD
