@@ -2,8 +2,8 @@
   "title": "PENERIMAAN PESERTA DIDIK BARU (PPS) 2026/2027",
   "sekolah": "SMP ABBS Surakarta",
   "total": 138,
-  "l_count": 87,
-  "p_count": 51,
+  "l_count": 88,
+  "p_count": 50,
   "per_tanggal": "4/7/2026",
   "siswa": [
     {
@@ -1104,7 +1104,7 @@
     },
     {
       "id": 138,
-      "program": "VCP-P",
+      "program": "VCP-L",
       "tgl_daftar": "13/6/2026",
       "nama": "Aaron blenda pratama",
       "asal_sekolah": "SDK Lampung Tengah",
