@@ -2,8 +2,8 @@
   "title": "PENERIMAAN PESERTA DIDIK BARU (PPS) 2026/2027",
   "sekolah": "SMP ABBS Surakarta",
   "total": 138,
-  "l_count": 88,
-  "p_count": 50,
+  "l_count": 87,
+  "p_count": 51,
   "per_tanggal": "4/7/2026",
   "siswa": [
     {
@@ -408,7 +408,7 @@
     },
     {
       "id": 51,
-      "program": "ICT-L",
+      "program": "ICT-P",
       "tgl_daftar": "01/08/2024",
       "nama": "Naura Titis Prabanggono",
       "asal_sekolah": "SDICT Al Abidin Surakarta",
